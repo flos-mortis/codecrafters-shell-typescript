@@ -1,6 +1,6 @@
 import { createInterface } from "readline";
 import path from "node:path";
-import { readdirSync, accessSync, constants } from "node:fs";
+import { readdirSync, accessSync, constants, opendir } from "node:fs";
 import { execFileSync } from "node:child_process";
 
 const rl = createInterface({
@@ -57,6 +57,15 @@ rl.on("line", (command: string) => {
 				);
 				break;
 			}
+		}
+		case command.startsWith('cd '): {
+			const path = command.split(" ")[1];
+			try {
+				process.chdir(path)
+			} catch (err) {
+				console.log(`cd: ${path}: No such file or directory`)
+			}
+			break
 		}
 		default: {
 			const commands = command.split(" ");
