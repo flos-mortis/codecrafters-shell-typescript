@@ -9,7 +9,7 @@ const rl = createInterface({
 	prompt: "$ ",
 });
 
-const shellBuiltIn = ["exit", "echo", "type"];
+const shellBuiltIn = ["exit", "echo", "type", "pwd"];
 
 const findExecutable = (commandName: string) => {
 	const dirs = process.env.PATH.split(path.delimiter);
@@ -36,6 +36,10 @@ rl.on("line", (command: string) => {
 		case command === "exit":
 			rl.close();
 			return;
+		case command === 'pwd': {
+			console.log(process.cwd())
+			break
+		}
 		case command.startsWith("echo "):
 			console.log(command.slice(5));
 			break;
