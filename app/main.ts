@@ -36,6 +36,7 @@ const findExecutable = (commandName: string) => {
 
 rl.prompt();
 rl.on("line", (command: string) => {
+	const args = command.split(" ")
 	switch (true) {
 		case command === "exit":
 			rl.close();
@@ -45,7 +46,10 @@ rl.on("line", (command: string) => {
 			break;
 		}
 		case command.startsWith("echo "):
-			console.log(command.slice(5));
+			if (command.includes("'")) {
+				console.log(command.slice(5).replaceAll("'", ""))
+			}
+			else console.log(command.slice(5).replace(/\s+/g, ' '));
 			break;
 		case command.startsWith("type "): {
 			const commandName = command.slice(5);
@@ -74,17 +78,34 @@ rl.on("line", (command: string) => {
 			break;
 		}
 		default: {
-			const commands = command.split(" ");
-			if (commands.length === 1) {
+			let isInQuote = false;
+			let args = []
+			let current = ""
+			for (let i = 0; i < command.length; i++) {
+				if (command[i] === "'") {
+					isInQuote = !isInQuote
+				}
+				else if (command[i] === " " && !isInQuote) {
+					args.push(current)
+					current = ''
+				}
+				else current += command[i]
+			}
+			if (current !== "") {
+				args.push(current)
+			}
+
+			if (args.length === 1) {
 				console.log(`${command}: command not found`);
 				break;
 			}
-			const executableDir = findExecutable(commands[0]);
+
+			const executableDir = findExecutable(args[0]);
 			if (executableDir) {
 				try {
 					const stdout = execFileSync(
 						executableDir.fileName,
-						commands.slice(1),
+						args.slice(1),
 						{ encoding: "utf8" },
 					);
 					console.log(stdout.trimEnd());
